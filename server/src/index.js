@@ -38,6 +38,14 @@ async function getAllFoodTrucks() {
 // 5. getTopRatedFoodTrucks()
 
 // 6. getFoodTrucksSortedByRating()
+async function getFoodTrucksSortedByRating() {
+  const result = await db.query(`
+    SELECT * 
+    FROM food_trucks
+    ORDER BY rating DESC
+  `);
+  return result.rows;
+}
 
 // 7. getFoodTrucksSortedByPrice()
 
@@ -77,7 +85,16 @@ async function addOneFoodTruck(
 // 11. updateFoodTruckLocation(id, newLocation)
 
 // 12. updateFoodTruckRating(id, newRating)
-
+async function updateFoodTruckRating(id, newRating) {
+  const result = await db.query(`
+    UPDATE food_trucks
+    SET rating = $2
+    WHERE id = $1
+    RETURNING *`,
+    [id, newRating]
+);
+  return result.rows[0];
+}
 // ---------------------------------
 // API Endpoints
 // ---------------------------------
@@ -97,6 +114,11 @@ app.get("/get-all-food-trucks", async (req, res) => {
 // 5. GET /get-top-rated-food-trucks - Morgan
 
 // 6. GET /get-food-trucks-sorted-by-rating - Zesty Pepper
+
+app.get("/get-food-trucks-sorted-by-rating", async (req, res) => {
+  const trucks = await getFoodTrucksSortedByRating();
+  res.json(trucks);
+});
 
 // 7. GET /get-food-trucks-sorted-by-price - Jana
 
@@ -131,5 +153,9 @@ app.post("/add-one-food-truck", async (req, res) => {
 
 // 11. POST /update-food-truck-location - Arianne
 
-// 12. POST /update-food-truck-rating - BONUS!
-
+// 12. POST /update-food-truck-rating - BONUS! - ZESTY
+app.post("/update-food-truck-rating", async (req, res) => {
+  const {id, rating} = req.body;
+  const truck = await updateFoodTruckRating(id, rating);
+   res.send(`Success! ${truck.name}'s rating was updated to ${truck.rating}.`);
+});
