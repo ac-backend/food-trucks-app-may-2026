@@ -31,7 +31,9 @@ async function getAllFoodTrucks() {
 
 // 2. getFoodTruckById(id)
 async function getFoodTruckById(id) {
-  const result = await db.query("SELECT * FROM food_trucks WHERE id = $1" , [id]);
+  const result = await db.query("SELECT * FROM food_trucks WHERE id = $1", [
+    id,
+  ]);
   return result.rows[0];
 }
 
@@ -59,7 +61,6 @@ async function getFoodTrucksByPrice(price) {
   return result.rows;
 }
 
-
 // 5. getTopRatedFoodTrucks()
 
 async function getTopRatedFoodTrucks() {
@@ -77,11 +78,10 @@ async function getTopRatedFoodTrucks() {
 // Function to retrieve all food trucks from the database
 // sorted by their rating from highest to lowest
 async function getFoodTrucksSortedByRating() {
-
   //  a SQL query to select all food trucks
   // and order the results by the rating column in descending order
   const result = await db.query(
-    "SELECT * FROM food_trucks ORDER BY rating DESC"
+    "SELECT * FROM food_trucks ORDER BY rating DESC",
   );
 
   // Return only the rows containing the food truck data
@@ -121,6 +121,13 @@ async function addOneFoodTruck(
 }
 
 // 10. deleteOneFoodTruck(id)
+async function deleteOneFoodTruck(id) {
+  const result = await db.query(
+    "DELETE FROM food_trucks WHERE id = $1 RETURNING *",
+    [id],
+  );
+  return result.rows[0];
+}
 
 // 11. updateFoodTruckLocation(id, newLocation)
 
@@ -132,12 +139,13 @@ async function addOneFoodTruck(
 
 // 1. GET /get-all-food-trucks
 app.get("/get-all-food-trucks", async (req, res) => {
+  console.log("Route was hit!");
   const trucks = await getAllFoodTrucks();
   res.json(trucks);
 });
 
 // 2. GET /get-food-truck-by-id/:id - Carlotta
-app.get("/get-food-truck-by-id/:id", async (req,res) => {
+app.get("/get-food-truck-by-id/:id", async (req, res) => {
   const { id } = req.params;
   const truck = await getFoodTruckById(id);
   if (truck) {
@@ -145,14 +153,13 @@ app.get("/get-food-truck-by-id/:id", async (req,res) => {
   } else {
     res.send(`Food truck with ID ${id} not found.`);
   }
-})
+});
 
 // 3. GET /get-vegan-food-trucks - Jana
 
 // 4. GET /get-food-trucks-by-price/:price - Hailey
 
-// 5. GET /get-top-rated-food-trucks - Zesty pepper 
-
+// 4. GET /get-food-trucks-by-price/:price - ?
 
 // 6. GET /get-food-trucks-sorted-by-rating -  Morgan
 // GET endpoint to retrieve all food trucks sorted by their rating
@@ -164,14 +171,13 @@ app.get("/get-food-trucks-sorted-by-rating", async (req, res) => {
 
     // Send a successful response (HTTP 200) with the food truck data as JSON
     res.status(200).json(foodTrucks);
-
   } catch (error) {
     // Logs the error in the server console for debugging
     console.error(error);
 
     // Send an error response (HTTP 500) if something goes wrong
     res.status(500).json({
-      error: "Failed to retrieve food trucks."
+      error: "Failed to retrieve food trucks.",
     });
   }
 });
@@ -205,8 +211,14 @@ app.post("/add-one-food-truck", async (req, res) => {
 });
 
 // 10. POST /delete-one-food-truck/:id - Seth
+app.post("/delete-one-food-truck/:id", async (req, res) => {
+  const id = req.params.id;
 
-// 11. POST /update-food-truck-location 
+  await deleteOneFoodTruck(id);
 
-// 12. POST /update-food-truck-rating 
+  res.send(`Success! ${id} was deleted.`);
+});
 
+// 11. POST /update-food-truck-location
+
+// 12. POST /update-food-truck-rating - BONUS!
