@@ -242,12 +242,12 @@ app.post("/add-one-food-truck", async (req, res) => {
 // 10. POST /delete-one-food-truck/:id - Seth
 app.post("/delete-one-food-truck/:id", async (req, res) => {
   const id = req.params.id;
-}
-// 11. POST /update-food-truck-location - Shirley
-app.post("/update-food-truck-location", async (req, res) => {
-  const { id, newLocation } = req.body;
-  await updateFoodTruckLocation(id, newLocation);
-  res.send("Success! The food truck location was updated!");
-});
 
-// 12. POST /update-food-truck-rating - BONUS!
+  await deleteOneFoodTruck(id);
+
+// 12. POST /update-food-truck-rating - BONUS! - ZESTY
+app.post("/update-food-truck-rating", async (req, res) => {
+  const {id, rating} = req.body;
+  const truck = await updateFoodTruckRating(id, rating);
+   res.send(`Success! ${truck.name}'s rating was updated to ${truck.rating}.`);
+});
